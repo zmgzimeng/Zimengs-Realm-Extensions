@@ -1,51 +1,38 @@
-// Name: Scroll Intensity
-// ID: mousescroll
-// Description: Get the magnitude of the scroll wheel.
-// By: AKAKingMrReeis <https://scratch.mit.edu/users/AKAKingMrReeis/>
-// Original:
-// License: MPL-2.0
-(function(Scratch) {
-  'use strict';
+class MouseScrollExtension {
+  constructor() {
+    this.scrollDelta = 0;
 
-  class MouseScrollExtension {
-    constructor() {
-      this.scrollDelta = 0;
-      this._resetTimeout = null;
-
-      // Use document instead of window for better compatibility in iframes
-      document.addEventListener('wheel', (e) => {
-        // e.deltaY: Positive is down, Negative is up
-        this.scrollDelta = e.deltaY;
-
-        // Clear existing timeout to ensure the value stays while scrolling
-        clearTimeout(this._resetTimeout);
-
-        // Reset to 0 after 100ms of inactivity
-        this._resetTimeout = setTimeout(() => {
-          this.scrollDelta = 0;
-        }, 100);
-      }, { passive: true });
-    }
-
-    getInfo() {
-      return {
-        id: 'mousescroll',
-        name: 'Mouse Scroll',
-        color1: '#5cb1d6',
-        blocks: [
-          {
-            opcode: 'getScrollIntensity',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'scroll intensity'
-          }
-        ]
-      };
-    }
-
-    getScrollIntensity() {
-      return this.scrollDelta;
-    }
+    // Listen for the wheel event on the entire window
+    window.addEventListener('wheel', (e) => {
+      // e.deltaY is positive when scrolling down, negative when scrolling up
+      this.scrollDelta = e.deltaY;
+      
+      // Optional: Reset the value after a short delay so it doesn't stay stuck
+      // Remove the code below if you want the "last scroll" to persist.
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        this.scrollDelta = 0;
+      }, 50); 
+    }, { passive: true });
   }
 
-  Scratch.extensions.register(new MouseScrollExtension());
-})(Scratch);
+  getInfo() {
+    return {
+      id: 'mousescroll',
+      name: 'Mouse Scroll',
+      blocks: [
+        {
+          opcode: 'getScrollIntensity',
+          blockType: Scratch.BlockType.REPORTER,
+          text: 'scroll intensity',
+        }
+      ]
+    };
+  }
+
+  getScrollIntensity() {
+    return this.scrollDelta;
+  }
+}
+
+Scratch.extensions.register(new MouseScrollExtension());
